@@ -6,28 +6,35 @@
     <title>Boss Spawn Calculator</title>
     <style>
         html, body {
-            height: 100%; /* Ensure full height for the background */
+            height: 100%;
             margin: 0;
         }
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             background-image: url('image.png');
-            background-size: cover; /* Make sure the background covers the entire page */
+            background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
             color: white;
             height: 100vh;
             margin: 0;
-            display: block;
-            overflow: hidden; /* Disable scrolling */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 850px;
         }
         table {
             margin-top: 20px;
             border-collapse: collapse;
-            width: 80%; /* Width is a percentage, making it responsive */
-            max-width: 800px; /* Limit the maximum width of the table */
+            width: 100%;
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
         }
@@ -40,54 +47,32 @@
         th {
             background-color: rgba(255, 255, 255, 0.3);
         }
-        .container {
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 75px;
-            width: 90%; /* Make the container width flexible */
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto; /* Center the container */
-        }
-
-        /* Ensure the first column adjusts to the longest name */
         td:first-child, th:first-child {
-            width: auto; /* Let the first column (Boss) adjust based on content */
-            min-width: 120px; /* Optional: you can set a minimum width */
+            width: auto;
+            min-width: 120px;
         }
-
-        /* Responsive Design for Mobile Devices */
         @media (max-width: 768px) {
             body {
-                font-size: 14px; /* Smaller font size on mobile */
+                font-size: 14px;
             }
-
             .container {
-                margin-top: 50px; /* Reduced margin for mobile */
-                padding: 15px; /* Reduced padding for mobile */
-                width: 95%; /* Make container width more flexible */
+                padding: 15px;
+                width: 95%;
             }
-
             table {
-                width: 100%; /* Make table take full width on smaller screens */
-                font-size: 12px; /* Smaller font size for table on mobile */
+                width: 100%;
+                font-size: 12px;
             }
-
             th, td {
-                padding: 6px; /* Reduced padding for table cells on mobile */
+                padding: 6px;
             }
         }
-
-        /* Larger Screen Adjustments (Optional) */
         @media (min-width: 1200px) {
             body {
-                font-size: 18px; /* Increase font size on larger screens */
+                font-size: 18px;
             }
-
             .container {
-                margin-top: 100px; /* More space on large screens */
-                padding: 30px; /* More padding on large screens */
+                padding: 30px;
             }
         }
     </style>
@@ -95,12 +80,12 @@
 <body>
     <div class="container">
         <h2>Boss Spawn Calculator</h2>
-        <label for="spawnTime">Initial Spawn Time (HH:MM):</label>
-        <input type="time" id="spawnTime" value="15:19" onchange="calculateSpawns()">
+        <p>Initial Spawn Time: <span id="spawnTimeDisplay">15:19</span></p>
         <table>
             <thead>
                 <tr>
                     <th>Boss</th>
+                    <th>Location</th>
                     <th colspan="8">Spawn Times</th>
                 </tr>
             </thead>
@@ -110,36 +95,37 @@
     
     <script>
         const bosses = {
-            "Anubis": 3,
-            "The Lost King": 3,
-            "Shogun": 4,
-            "Minotaur": 4,
-            "Golden Buddha": 4,
-            "Hellhound": 4,
-            "King Kong": 6,       // New boss every 6 hours
-            "Rock Man": 8,       // New boss every 8 hours
-            "General Charlie Will": 12, // New boss every 12 hours
-            "General Cruz": 12   // New boss every 12 hours
+            "Anubis": { interval: 3, location: "Alexandria" },
+            "The Lost King": { interval: 3, location: "Madeira" },
+            "Shogun": { interval: 4, location: "Edo" },
+            "Minotaur": { interval: 4, location: "Crete" },
+            "Golden Buddha": { interval: 4, location: "Semerang" },
+            "Strange Pirate Chief": { interval: 4, location: "Jamestown" },
+            "Hellhound": { interval: 4, location: "Stockholm" },
+            "King Kong": { interval: 6, location: "Luanda" },
+            "Rock Man": { interval: 8, location: "Jamestown" },
+            "General Charlie Will": { interval: 12, location: "London-Tortuga" },
+            "General Cruz": { interval: 12, location: "Seville-Tortuga" }
         };
 
         function calculateSpawns() {
-            const spawnTimeInput = document.getElementById("spawnTime").value;
-            if (!spawnTimeInput) return;
+            const spawnTimeDisplay = document.getElementById("spawnTimeDisplay").innerText;
+            if (!spawnTimeDisplay) return;
 
-            const [hours, minutes] = spawnTimeInput.split(":").map(Number);
+            const [hours, minutes] = spawnTimeDisplay.split(":").map(Number);
             let baseTime = new Date();
             baseTime.setHours(hours, minutes, 0, 0);
 
             const spawnTable = document.getElementById("spawnTable");
             spawnTable.innerHTML = "";
 
-            for (const [boss, interval] of Object.entries(bosses)) {
+            for (const [boss, data] of Object.entries(bosses)) {
                 let currentTime = new Date(baseTime);
-                let rowHTML = `<tr><td>${boss}</td>`;
+                let rowHTML = `<tr><td>${boss}</td><td contenteditable="true">${data.location}</td>`;
 
-                for (let i = 0; i < Math.floor(24 / interval); i++) {
+                for (let i = 0; i < Math.floor(24 / data.interval); i++) {
                     rowHTML += `<td>${currentTime.toTimeString().slice(0, 5)}</td>`;
-                    currentTime.setHours(currentTime.getHours() + interval);
+                    currentTime.setHours(currentTime.getHours() + data.interval);
                 }
                 rowHTML += "</tr>";
                 spawnTable.innerHTML += rowHTML;
