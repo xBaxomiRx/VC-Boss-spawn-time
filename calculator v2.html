@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boss Spawn Calculator</title>
+    <style>
+        html, body {
+            height: 100%; /* Ensure full height for the background */
+            margin: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('image.png');
+            background-size: cover; /* Make sure the background covers the entire page */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white;
+            height: 100vh;
+            margin: 0;
+            display: block;
+            overflow: hidden; /* Disable scrolling */
+        }
+        table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 800px; /* Limit the width of the table */
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            /* Removed table-layout: fixed to allow auto width for columns */
+        }
+        th, td {
+            border: 1px solid white;
+            padding: 8px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        th {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        .container {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 75px;
+            width: 100%;
+            max-width: 800px; /* Ensure the container has a max-width */
+            margin-left: auto;
+            margin-right: auto; /* Center the container */
+        }
+        /* Ensure the first column adjusts to the longest name */
+        td:first-child, th:first-child {
+            width: auto; /* Let the first column (Boss) adjust based on content */
+            min-width: 120px; /* Optional: you can set a minimum width if you want */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Boss Spawn Calculator</h2>
+        <label for="spawnTime">Initial Spawn Time (HH:MM):</label>
+        <input type="time" id="spawnTime" value="00:00" onchange="calculateSpawns()">
+        <table>
+            <thead>
+                <tr>
+                    <th>Boss</th>
+                    <th colspan="8">Spawn Times</th>
+                </tr>
+            </thead>
+            <tbody id="spawnTable"></tbody>
+        </table>
+    </div>
+    
+    <script>
+        const bosses = {
+            "Anubis": 3,
+            "Lost Pirate": 3,
+            "Shogun": 4,
+            "Minotaur": 4,
+            "Golden Buddha": 4,
+            "Hellhound": 4
+        };
+
+        function calculateSpawns() {
+            const spawnTimeInput = document.getElementById("spawnTime").value;
+            if (!spawnTimeInput) return;
+
+            const [hours, minutes] = spawnTimeInput.split(":").map(Number);
+            let baseTime = new Date();
+            baseTime.setHours(hours, minutes, 0, 0);
+
+            const spawnTable = document.getElementById("spawnTable");
+            spawnTable.innerHTML = "";
+
+            for (const [boss, interval] of Object.entries(bosses)) {
+                let currentTime = new Date(baseTime);
+                let rowHTML = `<tr><td>${boss}</td>`;
+
+                for (let i = 0; i < Math.floor(24 / interval); i++) {
+                    rowHTML += `<td>${currentTime.toTimeString().slice(0, 5)}</td>`;
+                    currentTime.setHours(currentTime.getHours() + interval);
+                }
+                rowHTML += "</tr>";
+                spawnTable.innerHTML += rowHTML;
+            }
+        }
+
+        window.onload = calculateSpawns;
+    </script>
+</body>
+</html>
