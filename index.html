@@ -100,18 +100,16 @@
             "Shogun": { interval: 4, location: "Edo" },
             "Minotaur": { interval: 4, location: "Crete" },
             "Golden Buddha": { interval: 4, location: "Semerang" },
-            "Strange Pirate Chief": { interval: 4, location: "Jamestown" },
             "Hellhound": { interval: 4, location: "Stockholm" },
             "King Kong": { interval: 6, location: "Luanda" },
+            "Strange Pirate Chief": { interval: 8, location: "Jamestown" },
             "Rock Man": { interval: 8, location: "Jamestown" },
-            "General Charlie Will": { interval: 12, location: "London-Tortuga" },
-            "General Cruz": { interval: 12, location: "Seville-Tortuga" }
+            "General Charlie Will": { interval: 12, location: "London-Tortuga", initialTime: "12:20" }, // Manual adjustment in backend
+            "General Cruz": { interval: 12, location: "Seville-Tortuga", initialTime: "00:20" } // Manual adjustment in backend
         };
 
         function calculateSpawns() {
             const spawnTimeDisplay = document.getElementById("spawnTimeDisplay").innerText;
-            if (!spawnTimeDisplay) return;
-
             const [hours, minutes] = spawnTimeDisplay.split(":").map(Number);
             let baseTime = new Date();
             baseTime.setHours(hours, minutes, 0, 0);
@@ -123,6 +121,16 @@
                 let currentTime = new Date(baseTime);
                 let rowHTML = `<tr><td>${boss}</td><td contenteditable="true">${data.location}</td>`;
 
+                // For General Charlie Will and General Cruz, use the manually set initial time if defined
+                if (boss === "General Charlie Will" && data.initialTime) {
+                    const [initHours, initMinutes] = data.initialTime.split(":").map(Number);
+                    currentTime.setHours(initHours, initMinutes, 0, 0);
+                } else if (boss === "General Cruz" && data.initialTime) {
+                    const [initHours, initMinutes] = data.initialTime.split(":").map(Number);
+                    currentTime.setHours(initHours, initMinutes, 0, 0);
+                }
+
+                // Calculate spawn times for all bosses based on their spawn interval
                 for (let i = 0; i < Math.floor(24 / data.interval); i++) {
                     rowHTML += `<td>${currentTime.toTimeString().slice(0, 5)}</td>`;
                     currentTime.setHours(currentTime.getHours() + data.interval);
