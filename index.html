@@ -26,11 +26,10 @@
         table {
             margin-top: 20px;
             border-collapse: collapse;
-            width: 100%;
-            max-width: 800px; /* Limit the width of the table */
+            width: 80%; /* Width is a percentage, making it responsive */
+            max-width: 800px; /* Limit the maximum width of the table */
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            /* Removed table-layout: fixed to allow auto width for columns */
         }
         th, td {
             border: 1px solid white;
@@ -46,15 +45,50 @@
             padding: 20px;
             border-radius: 10px;
             margin-top: 75px;
-            width: 100%;
-            max-width: 800px; /* Ensure the container has a max-width */
+            width: 90%; /* Make the container width flexible */
+            max-width: 800px;
             margin-left: auto;
             margin-right: auto; /* Center the container */
         }
+
         /* Ensure the first column adjusts to the longest name */
         td:first-child, th:first-child {
             width: auto; /* Let the first column (Boss) adjust based on content */
-            min-width: 120px; /* Optional: you can set a minimum width if you want */
+            min-width: 120px; /* Optional: you can set a minimum width */
+        }
+
+        /* Responsive Design for Mobile Devices */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px; /* Smaller font size on mobile */
+            }
+
+            .container {
+                margin-top: 50px; /* Reduced margin for mobile */
+                padding: 15px; /* Reduced padding for mobile */
+                width: 95%; /* Make container width more flexible */
+            }
+
+            table {
+                width: 100%; /* Make table take full width on smaller screens */
+                font-size: 12px; /* Smaller font size for table on mobile */
+            }
+
+            th, td {
+                padding: 6px; /* Reduced padding for table cells on mobile */
+            }
+        }
+
+        /* Larger Screen Adjustments (Optional) */
+        @media (min-width: 1200px) {
+            body {
+                font-size: 18px; /* Increase font size on larger screens */
+            }
+
+            .container {
+                margin-top: 100px; /* More space on large screens */
+                padding: 30px; /* More padding on large screens */
+            }
         }
     </style>
 </head>
@@ -62,7 +96,7 @@
     <div class="container">
         <h2>Boss Spawn Calculator</h2>
         <label for="spawnTime">Initial Spawn Time (HH:MM):</label>
-        <input type="time" id="spawnTime" value="15:19" onchange="calculateSpawns()">
+        <input type="time" id="spawnTime" value="10:53" onchange="calculateSpawns()">
         <table>
             <thead>
                 <tr>
@@ -81,7 +115,11 @@
             "Shogun": 4,
             "Minotaur": 4,
             "Golden Buddha": 4,
-            "Hellhound": 4
+            "Hellhound": 4,
+            "King Kong": 6,       // New boss every 6 hours
+            "Rock-Man": 8,       // New boss every 8 hours
+            "General Charlie Will": 12, // New boss every 12 hours
+            "General Cruz": 12   // New boss every 12 hours
         };
 
         function calculateSpawns() {
