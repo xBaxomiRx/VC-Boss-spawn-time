@@ -28,7 +28,6 @@
     }
     h2 { margin: 0 0 10px 0; }
 
-    /* Server reset: bold wood tab */
     .pill {
       display:inline-block;
       padding:8px 14px;
@@ -41,7 +40,6 @@
       margin: 6px;
     }
 
-    /* Combined wood tab for timezone */
     .tz-combo-wrap { display:flex; justify-content:center; }
     .tz-toggle-combo {
       display:inline-flex; align-items:center; gap:10px;
@@ -60,7 +58,6 @@
     .tz-value { font-weight: bold; }
     .tz-caret { margin-left: 4px; opacity:.9; }
 
-    /* Dropdown (wood) */
     .tz-menu {
       position: absolute;
       top: calc(100% + 6px);
@@ -99,7 +96,6 @@
 
     .help { opacity:.9; margin: 4px 0 8px; }
 
-    /* Table */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -118,42 +114,20 @@
     .soon { color: #00ffcc; }
     .now { color: #ffea00; font-weight: 800; }
 
-    /* PvP badge inside Boss cell */
-    .boss-cell {
-      position: relative;
-      padding-left: 60px; /* room for badge on the left */
-    }
+    .boss-cell { position: relative; padding-left: 60px; }
     .pvp-badge {
-      position: absolute;
-      left: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #2cff9a;          /* green */
-      font-weight: 700;
-      letter-spacing: .5px;
-      text-transform: uppercase;
+      position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+      color: #2cff9a; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
     }
-    .boss-name {
-      display: block;
-      text-align: center;      /* keep boss name centered */
-      width: 100%;
-    }
-
-    @media (max-width: 768px) {
-      table { font-size: 12px; }
-      th, td { padding: 6px; }
-      .boss-cell { padding-left: 52px; }
-    }
+    .boss-name { display:block; text-align:center; width:100%; }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Boss Spawn Countdown</h2>
 
-    <!-- Server reset (bold) -->
-    <div class="pill">Server reset: <span id="serverResetLabel"></span> (CET)</div>
+    <div class="pill">Server reset: <span id="serverResetLabel"></span> (CEST)</div>
 
-    <!-- Combined wood tab: label + timezone value -->
     <div class="tz-combo-wrap">
       <button type="button" class="tz-toggle-combo" id="tzToggle" aria-haspopup="listbox" aria-expanded="false">
         <span class="tz-label">Your Timezone:</span>
@@ -162,7 +136,6 @@
       </button>
     </div>
 
-    <!-- Wood dropdown -->
     <div class="tz-menu" id="tzMenu" role="listbox">
       <input class="tz-search" id="tzSearch" placeholder="Search city/region…">
       <div class="tz-list" id="tzList"></div>
@@ -185,43 +158,40 @@
   </div>
 
   <script>
-    /* ===== ADMIN CONFIG ===== */
-    const SERVER_TZ = "Europe/Vienna";   // CET/CEST
-    const SERVER_RESET_HHMM = "15:44";   // daily server reset time
+    /* ===== CONFIG ===== */
+    const SERVER_RESET_HHMM = "15:44";
+    const CEST_OFFSET_HOURS = 2;           // fixed +02:00 (no DST)
+    const FIXED_LABEL = "CEST";
 
-    // Add bosses here. For PvP/fixed-time bosses, use fixedCET:"HH:MM" instead of interval.
+    // Your bosses (unchanged)
     const BOSSES = [
-  { name: "Anubis",               location: "Alexandria",     interval: 3 },
-  { name: "Lost King",            location: "Madeira",        interval: 3 },
-  { name: "Shogun",               location: "Edo",            interval: 4 },
-  { name: "Minotaur",             location: "Crete",          interval: 4 },
-  { name: "Golden Buddha",        location: "Semerang",       interval: 4 },
-  { name: "Hell Hound",           location: "Stockholm",      interval: 4 },
-  { name: "General Charlie Will", location: "London-Tortuga", interval: 12 },
-  { name: "General Cruz",         location: "Seville-Tortuga",interval: 12 },
+      { name: "Anubis",               location: "Alexandria - Pyramid",       interval: 3 },
+      { name: "Lost King",            location: "Madeira",                    interval: 3 },
+      { name: "Shogun",               location: "Edo",                        interval: 4 },
+      { name: "Minotaur",             location: "Crete - Labyrinth",          interval: 4 },
+      { name: "Golden Buddha",        location: "Semerang",                   interval: 4 },
+      { name: "Hell Hound",           location: "Stockholm",                  interval: 4 },
+      { name: "General Charlie Will", location: "London - Tortuga",           interval: 12 },
+      { name: "General Cruz",         location: "Seville - Tortuga",          interval: 12 },
 
-  // PvP section
-  { name: "PvP - Strange Pirate Chief", location: "Jamestown",     interval: 1 },
-  { name: "PvP - Rock Man",             location: "Jamestown",     interval: 2 },
-  { name: "PvP - Lost Waterway Pirate", location: "New Amsterdam", interval: 1 },
-  { name: "PvP - General Ken",          location: "New Amsterdam", interval: 2 },
+      { name: "PvP - Strange Pirate Chief", location: "Jamestown",     interval: 1 },
+      { name: "PvP - Rock Man",             location: "Jamestown",     interval: 2 },
+      { name: "PvP - Lost Waterway Pirate", location: "New Amsterdam", interval: 1 },
+      { name: "PvP - General Ken",          location: "New Amsterdam", interval: 2 },
 
-  // Fixed time PvP bosses
-  { name: "PvP - General Justin", location: "Mogadishu",     fixedCET: "18:00" },
-  { name: "PvP - King Kong",      location: "Luanda (Kongo Jungle)", fixedCET: "19:00" },   // ✅ fixed now
-  { name: "PvP - Hydra",          location: "Hydra cave of flames (Zhigu)", fixedCET: "21:00" }, // ✅ fixed now
-  { name: "PvP - Ice Dragon",     location: "Basra",         fixedCET: "22:00" },
-  { name: "PvP - Fenrir",         location: "Oslo",          fixedCET: "15:00" },
-];
-    /* ======================== */
+      { name: "PvP - General Justin", location: "Mogadishu",                    fixedCET: "12:00" },
+	  { name: "PvP - Ice Dragon",     location: "Basra",                        fixedCET: "18:00" },
+      { name: "PvP - King Kong",      location: "Luanda (Congo Jungle)",        fixedCET: "19:00" },
+      { name: "PvP - Hydra",          location: "Zhigu - Hydra cave of flames", fixedCET: "21:00" },
+      { name: "PvP - Fenrir",         location: "Oslo",                         fixedCET: "22:00" },
+    ];
+    /* ==================== */
 
     const serverResetLabel = document.getElementById("serverResetLabel");
     serverResetLabel.textContent = SERVER_RESET_HHMM;
 
     const tbody = document.getElementById("tbody");
     function pad(n){ return n.toString().padStart(2,"0"); }
-
-    // Format date in chosen tz
     function fmtHMInTZ(date, tz) {
       return new Intl.DateTimeFormat("en-GB", {
         hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz
@@ -241,22 +211,22 @@
       return p ? p.value.replace("GMT","UTC") : "UTC";
     }
 
-    // Build Date for "today at HH:MM in SERVER_TZ"
-    function serverTodayAt(hh, mm) {
-      const serverNow = new Date(new Date().toLocaleString("en-US", { timeZone: SERVER_TZ }));
-      const y = serverNow.getFullYear(), m = serverNow.getMonth(), d = serverNow.getDate();
-      let guess = new Date(Date.UTC(y, m, d, hh, mm, 0, 0));
-      const parts = new Intl.DateTimeFormat("en-GB", { timeZone: SERVER_TZ, hour:"2-digit", minute:"2-digit", hour12:false }).formatToParts(guess);
-      const obsH = parseInt(parts.find(p=>p.type==="hour").value,10);
-      const obsM = parseInt(parts.find(p=>p.type==="minute").value,10);
-      const deltaMin = (hh*60 + mm) - (obsH*60 + obsM);
-      return new Date(guess.getTime() - deltaMin*60000);
+    /* Build an absolute Date for "today at HH:MM" in a fixed offset (+02:00) zone */
+    function fixedOffsetTodayAt(offsetHours, hh, mm){
+      // "Local day" in that offset:
+      const nowUTC = new Date();
+      const localMs = nowUTC.getTime() + offsetHours*3600*1000;
+      const local = new Date(localMs);
+      const y = local.getUTCFullYear(), m = local.getUTCMonth(), d = local.getUTCDate();
+      // Convert that local (offset) wall-clock to an absolute UTC instant:
+      const utcMs = Date.UTC(y, m, d, hh - offsetHours, mm, 0, 0);
+      return new Date(utcMs);
     }
 
-    // Next spawn for interval bosses (anchored to server reset)
+    // Interval bosses — anchored to server reset in fixed CEST
     function nextFromResetInterval(intervalHours){
       const [h, m] = SERVER_RESET_HHMM.split(":").map(Number);
-      const resetToday = serverTodayAt(h, m);
+      const resetToday = fixedOffsetTodayAt(CEST_OFFSET_HOURS, h, m);
       const now = new Date();
       const lastReset = (now >= resetToday) ? resetToday : new Date(resetToday.getTime() - 24*3600*1000);
       const step = intervalHours * 3600 * 1000;
@@ -266,10 +236,10 @@
       return new Date(lastReset.getTime() + k * step);
     }
 
-    // Next spawn for fixed-time bosses (daily at fixed HH:MM CET)
-    function nextFromFixedCET(hhmm){
+    // Fixed-time bosses — daily at HH:MM in fixed CEST
+    function nextFromFixedCEST(hhmm){
       const [hh, mm] = hhmm.split(":").map(Number);
-      const todayAt = serverTodayAt(hh, mm);
+      const todayAt = fixedOffsetTodayAt(CEST_OFFSET_HOURS, hh, mm);
       const now = new Date();
       return (now <= todayAt) ? todayAt : new Date(todayAt.getTime() + 24*3600*1000);
     }
@@ -277,17 +247,12 @@
     function buildRows() {
       tbody.innerHTML = "";
       BOSSES.forEach((b, i) => {
-        // Detect PvP rows (everything from first row whose name starts with 'PvP -')
         const isPvP = b.name.startsWith("PvP -");
-
-        // Boss cell HTML: PvP badge left + centered name (without 'PvP - ' prefix)
         const bossLabel = isPvP ? b.name.replace(/^PvP -\s*/i, "") : b.name;
         const bossCell = isPvP
           ? `<td class="boss-cell"><span class="pvp-badge">PvP</span><span class="boss-name">${bossLabel}</span></td>`
           : `<td>${bossLabel}</td>`;
-
-        // Interval column: show "HH:MM CET" for fixed-time bosses
-        const intervalCell = b.fixedCET ? `${b.fixedCET} CET` : `${b.interval}h`;
+        const intervalCell = b.fixedCET ? `${b.fixedCET} ${FIXED_LABEL}` : `${b.interval}h`;
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -301,7 +266,7 @@
       });
     }
 
-    // ===== Timezone picker (combined tab) =====
+    /* Timezone picker (combined tab) */
     const tzToggle = document.getElementById("tzToggle");
     const tzMenu = document.getElementById("tzMenu");
     const tzSearch = document.getElementById("tzSearch");
@@ -309,72 +274,46 @@
     const tzCurrent = document.getElementById("tzCurrent");
 
     const ALL_TZS = (Intl.supportedValuesOf && Intl.supportedValuesOf("timeZone")) || [
-      "UTC","Europe/Vienna","Europe/Berlin","Europe/London","America/New_York","America/Los_Angeles","Asia/Tokyo","Australia/Sydney"
+      "Europe/Vienna","Europe/Berlin","UTC","America/New_York","America/Los_Angeles","Asia/Tokyo","Australia/Sydney"
     ];
 
     function renderTzList(filter = "") {
       tzList.innerHTML = "";
       const q = filter.trim().toLowerCase();
-      ALL_TZS
-        .filter(tz => tz.toLowerCase().includes(q))
-        .forEach(tz => {
-          const div = document.createElement("div");
-          div.className = "tz-item";
-          const label = `${tz} (${utcOffsetLabel(tz)})`;
-          div.textContent = label;
-          div.dataset.tz = tz;
-          div.addEventListener("click", () => selectTimezone(tz, label));
-          tzList.appendChild(div);
-        });
+      ALL_TZS.filter(tz => tz.toLowerCase().includes(q)).forEach(tz => {
+        const div = document.createElement("div");
+        div.className = "tz-item";
+        const label = `${tz} (${utcOffsetLabel(tz)})`;
+        div.textContent = label;
+        div.dataset.tz = tz;
+        div.addEventListener("click", () => selectTimezone(tz, label));
+        tzList.appendChild(div);
+      });
     }
-    function openTzMenu(){
-      const rect = tzToggle.getBoundingClientRect();
-      tzMenu.style.top = `${rect.bottom + window.scrollY + 6}px`;
-      tzMenu.style.left = `50%`;
-      tzMenu.classList.add("open");
-      tzToggle.setAttribute("aria-expanded","true");
-      tzSearch.value = "";
-      renderTzList("");
-      setTimeout(()=>tzSearch.focus(),0);
-    }
-    function closeTzMenu(){
-      tzMenu.classList.remove("open");
-      tzToggle.setAttribute("aria-expanded","false");
-    }
-    function selectTimezone(tz, label){
-      localStorage.setItem("boss_timezone", tz);
-      tzCurrent.textContent = label;
-      closeTzMenu();
-      startTick();
-    }
+    function openTzMenu(){ tzMenu.classList.add("open"); tzToggle.setAttribute("aria-expanded","true"); tzSearch.value=""; renderTzList(""); setTimeout(()=>tzSearch.focus(),0); }
+    function closeTzMenu(){ tzMenu.classList.remove("open"); tzToggle.setAttribute("aria-expanded","false"); }
+    function selectTimezone(tz, label){ localStorage.setItem("boss_timezone", tz); tzCurrent.textContent = label; closeTzMenu(); startTick(); }
 
-    tzToggle.addEventListener("click", (e)=>{
-      e.stopPropagation();
-      tzMenu.classList.contains("open") ? closeTzMenu() : openTzMenu();
-    });
+    tzToggle.addEventListener("click", (e)=>{ e.stopPropagation(); tzMenu.classList.contains("open") ? closeTzMenu() : openTzMenu(); });
     tzSearch.addEventListener("input", (e)=> renderTzList(e.target.value));
-    document.addEventListener("click", (e)=> {
-      if (!tzMenu.contains(e.target) && e.target !== tzToggle) closeTzMenu();
-    });
-    document.addEventListener("keydown", (e)=> { if (e.key === "Escape") closeTzMenu(); });
+    document.addEventListener("click", (e)=>{ if (!tzMenu.contains(e.target) && e.target !== tzToggle) closeTzMenu(); });
+    document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closeTzMenu(); });
 
-    // Init picker label
     (function initPicker(){
       const saved = localStorage.getItem("boss_timezone");
-      const localTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-      const tz = saved || localTZ;
+      const defaultTZ = "Europe/Vienna";  // shows as CEST in summer for users
+      const tz = saved || defaultTZ;
       tzCurrent.textContent = `${tz} (${utcOffsetLabel(tz)})`;
     })();
 
-    // ===== Ticking logic =====
     let tickHandle = null;
     function startTick(){
       if (tickHandle) clearInterval(tickHandle);
-      const tz = (localStorage.getItem("boss_timezone")) || (Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
+      const tz = (localStorage.getItem("boss_timezone")) || "Europe/Vienna";
       function tick(){
         const now = new Date();
         BOSSES.forEach((b,i)=>{
-          const next = b.fixedCET ? nextFromFixedCET(b.fixedCET) : nextFromResetInterval(b.interval);
+          const next = b.fixedCET ? nextFromFixedCEST(b.fixedCET) : nextFromResetInterval(b.interval);
           const diff = next - now;
           const nextEl = document.getElementById(`next-${i}`);
           const cdEl = document.getElementById(`cd-${i}`);
@@ -393,4 +332,3 @@
   </script>
 </body>
 </html>
-
