@@ -1,148 +1,395 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boss Spawn Calculator</title>
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-image: url('image.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            color: white;
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 850px;
-        }
-        table {
-            margin-top: 20px;
-            border-collapse: collapse;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-        }
-        th, td {
-            border: 1px solid white;
-            padding: 8px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        th {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-        td:first-child, th:first-child {
-            width: auto;
-            min-width: 120px;
-        }
-        @media (max-width: 768px) {
-            body {
-                font-size: 14px;
-            }
-            .container {
-                padding: 15px;
-                width: 95%;
-            }
-            table {
-                width: 100%;
-                font-size: 12px;
-            }
-            th, td {
-                padding: 6px;
-            }
-        }
-        @media (min-width: 1200px) {
-            body {
-                font-size: 18px;
-            }
-            .container {
-                padding: 30px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Boss Spawn Countdown</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: url('image.png') no-repeat center/cover fixed;
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .container {
+      background-color: rgba(0,0,0,0.55);
+      padding: 20px;
+      border-radius: 12px;
+      width: 95%;
+      max-width: 980px;
+      backdrop-filter: blur(2px);
+    }
+    h2 { margin: 0 0 10px 0; }
+
+    /* Server reset: bold wood tab */
+    .pill {
+      display:inline-block;
+      padding:8px 14px;
+      border-radius:10px;
+      font-weight:bold;
+      background:url('wood.png') no-repeat center/cover;
+      color:#fff5ea;
+      border:1px solid rgba(255,255,255,0.35);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+      margin: 6px;
+    }
+
+    /* Combined wood tab for timezone */
+    .tz-combo-wrap { display:flex; justify-content:center; }
+    .tz-toggle-combo {
+      display:inline-flex; align-items:center; gap:10px;
+      padding: 8px 14px;
+      border-radius:10px;
+      background:url('wood.png') no-repeat center/cover;
+      color:#fff5ea;
+      border:1px solid rgba(255,255,255,0.35);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+      margin: 6px;
+      cursor: pointer;
+      text-align: left;
+      appearance:none; -webkit-appearance:none; border-width:1px;
+    }
+    .tz-label { font-weight: normal; opacity:.95; }
+    .tz-value { font-weight: bold; }
+    .tz-caret { margin-left: 4px; opacity:.9; }
+
+    /* Dropdown (wood) */
+    .tz-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(560px, 92vw);
+      display: none;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.4);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.5);
+      z-index: 100;
+    }
+    .tz-menu.open { display: block; }
+    .tz-search {
+      padding: 10px 12px;
+      border: none;
+      outline: none;
+      width: 100%;
+      color: #fff5ea;
+      background: url('wood.png') no-repeat center/cover;
+    }
+    .tz-list {
+      max-height: 280px;
+      overflow-y: auto;
+      background: url('wood.png') repeat center/cover;
+    }
+    .tz-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      color: #fff5ea;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .tz-item:last-child { border-bottom: none; }
+    .tz-item:hover, .tz-item.active { background: rgba(255,255,255,0.15); }
+
+    .help { opacity:.9; margin: 4px 0 8px; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      background: rgba(0,0,0,0.7);
+    }
+    th, td {
+      border: 1px solid white;
+      padding: 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    th { background: rgba(255,255,255,0.25); }
+    td:first-child, th:first-child { min-width: 140px; }
+    .nextTime { font-weight: 700; }
+    .soon { color: #00ffcc; }
+    .now { color: #ffea00; font-weight: 800; }
+
+    /* PvP badge inside Boss cell */
+    .boss-cell {
+      position: relative;
+      padding-left: 60px; /* room for badge on the left */
+    }
+    .pvp-badge {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #2cff9a;          /* green */
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .boss-name {
+      display: block;
+      text-align: center;      /* keep boss name centered */
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      table { font-size: 12px; }
+      th, td { padding: 6px; }
+      .boss-cell { padding-left: 52px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Boss Spawn Calculator</h2>
-        <p>Initial Spawn Time: <span id="spawnTimeDisplay">15:44</span></p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Boss</th>
-                    <th>Location</th>
-                    <th colspan="8">Spawn Times</th>
-                </tr>
-            </thead>
-            <tbody id="spawnTable"></tbody>
-        </table>
+  <div class="container">
+    <h2>Boss Spawn Countdown</h2>
+
+    <!-- Server reset (bold) -->
+    <div class="pill">Server reset: <span id="serverResetLabel"></span> (CET)</div>
+
+    <!-- Combined wood tab: label + timezone value -->
+    <div class="tz-combo-wrap">
+      <button type="button" class="tz-toggle-combo" id="tzToggle" aria-haspopup="listbox" aria-expanded="false">
+        <span class="tz-label">Your Timezone:</span>
+        <span class="tz-value" id="tzCurrent">Loading…</span>
+        <span class="tz-caret">▾</span>
+      </button>
     </div>
-    
-    <script>
-        const bosses = {
-            "Anubis": { interval: 3, location: "Alexandria" },
-            "Lost King": { interval: 3, location: "Madeira" },
-            "Shogun": { interval: 4, location: "Edo" },
-            "Minotaur": { interval: 4, location: "Crete" },
-            "Golden Buddha": { interval: 4, location: "Semerang" },
-            "Hell Hound": { interval: 4, location: "Stockholm" },
-            "King Kong": { interval: 6, location: "Luanda" },
-            "Strange Pirate Chief": { interval: 8, location: "Jamestown" },
-            "Rock Man": { interval: 8, location: "Jamestown" },
-            "General Charlie Will": { interval: 12, location: "London-Tortuga", initialTime: "15:44" }, // Manual adjustment in backend
-            "General Cruz": { interval: 12, location: "Seville-Tortuga", initialTime: "15:44" } // Manual adjustment in backend
-        };
 
-        function calculateSpawns() {
-            const spawnTimeDisplay = document.getElementById("spawnTimeDisplay").innerText;
-            const [hours, minutes] = spawnTimeDisplay.split(":").map(Number);
-            let baseTime = new Date();
-            baseTime.setHours(hours, minutes, 0, 0);
+    <!-- Wood dropdown -->
+    <div class="tz-menu" id="tzMenu" role="listbox">
+      <input class="tz-search" id="tzSearch" placeholder="Search city/region…">
+      <div class="tz-list" id="tzList"></div>
+    </div>
 
-            const spawnTable = document.getElementById("spawnTable");
-            spawnTable.innerHTML = "";
+    <div class="help">Times below are shown in your selected timezone.</div>
 
-            for (const [boss, data] of Object.entries(bosses)) {
-                let currentTime = new Date(baseTime);
-                let rowHTML = `<tr><td>${boss}</td><td contenteditable="true">${data.location}</td>`;
+    <table>
+      <thead>
+        <tr>
+          <th>Boss</th>
+          <th>Location</th>
+          <th>Interval</th>
+          <th>Next Spawn</th>
+          <th>Countdown</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
 
-                // For General Charlie Will and General Cruz, use the manually set initial time if defined
-                if (boss === "General Charlie Will" && data.initialTime) {
-                    const [initHours, initMinutes] = data.initialTime.split(":").map(Number);
-                    currentTime.setHours(initHours, initMinutes, 0, 0);
-                } else if (boss === "General Cruz" && data.initialTime) {
-                    const [initHours, initMinutes] = data.initialTime.split(":").map(Number);
-                    currentTime.setHours(initHours, initMinutes, 0, 0);
-                }
+  <script>
+    /* ===== ADMIN CONFIG ===== */
+    const SERVER_TZ = "Europe/Vienna";   // CET/CEST
+    const SERVER_RESET_HHMM = "15:44";   // daily server reset time
 
-                // Calculate spawn times for all bosses based on their spawn interval
-                for (let i = 0; i < Math.floor(24 / data.interval); i++) {
-                    rowHTML += `<td>${currentTime.toTimeString().slice(0, 5)}</td>`;
-                    currentTime.setHours(currentTime.getHours() + data.interval);
-                }
-                rowHTML += "</tr>";
-                spawnTable.innerHTML += rowHTML;
-            }
-        }
+    // Add bosses here. For PvP/fixed-time bosses, use fixedCET:"HH:MM" instead of interval.
+    const BOSSES = [
+      { name: "Anubis",               location: "Alexandria",         interval: 3 },
+      { name: "Lost King",            location: "Madeira",            interval: 3 },
+      { name: "Shogun",               location: "Edo",                interval: 4 },
+      { name: "Minotaur",             location: "Crete",              interval: 4 },
+      { name: "Golden Buddha",        location: "Semerang",           interval: 4 },
+      { name: "Hell Hound",           location: "Stockholm",          interval: 4 },
+      { name: "General Charlie Will", location: "London - Tortuga",   interval: 12 },
+      { name: "General Cruz",         location: "Seville - Tortuga",  interval: 12 },
 
-        window.onload = calculateSpawns;
-    </script>
+      // PvP section (from here down we show the PvP badge)
+      { name: "PvP - Strange Pirate Chief", location: "Jamestown",                interval: 1 },
+      { name: "PvP - Rock Man",             location: "Jamestown",                interval: 2 },
+      { name: "PvP - Lost Waterway Pirate", location: "New Amsterdam",            interval: 1 },
+	  { name: "PvP - General Ken",          location: "New Amsterdam",            interval: 2 },
+
+      // Last five use FIXED CET TIMES (daily)
+      { name: "PvP - General Justin",       location: "Mogadishu",                    fixedCET: "19:00" },
+      { name: "PvP - King Kong",            location: "New Amsterdam",                fixedCET: "21:00" },
+      { name: "PvP - Hydra",                location: "Hydra cave of flames (Zhigu)", fixedCET: "22:00" },
+      { name: "PvP - Ice Dragon",           location: "Basra",                        fixedCET: "18:00" },
+      { name: "PvP - Fenrir",               location: "Oslo",                         fixedCET: "15:00" },
+    ];
+    /* ======================== */
+
+    const serverResetLabel = document.getElementById("serverResetLabel");
+    serverResetLabel.textContent = SERVER_RESET_HHMM;
+
+    const tbody = document.getElementById("tbody");
+    function pad(n){ return n.toString().padStart(2,"0"); }
+
+    // Format date in chosen tz
+    function fmtHMInTZ(date, tz) {
+      return new Intl.DateTimeFormat("en-GB", {
+        hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz
+      }).format(date);
+    }
+    function fmtHMS(ms){
+      if (ms < 0) ms = 0;
+      const s = Math.floor(ms/1000);
+      const h = Math.floor(s/3600);
+      const m = Math.floor((s%3600)/60);
+      const ss = s%60;
+      return `${pad(h)}:${pad(m)}:${pad(ss)}`;
+    }
+    function utcOffsetLabel(tz, atDate = new Date()){
+      const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "shortOffset", hour: "2-digit" }).formatToParts(atDate);
+      const p = parts.find(x => x.type === "timeZoneName");
+      return p ? p.value.replace("GMT","UTC") : "UTC";
+    }
+
+    // Build Date for "today at HH:MM in SERVER_TZ"
+    function serverTodayAt(hh, mm) {
+      const serverNow = new Date(new Date().toLocaleString("en-US", { timeZone: SERVER_TZ }));
+      const y = serverNow.getFullYear(), m = serverNow.getMonth(), d = serverNow.getDate();
+      let guess = new Date(Date.UTC(y, m, d, hh, mm, 0, 0));
+      const parts = new Intl.DateTimeFormat("en-GB", { timeZone: SERVER_TZ, hour:"2-digit", minute:"2-digit", hour12:false }).formatToParts(guess);
+      const obsH = parseInt(parts.find(p=>p.type==="hour").value,10);
+      const obsM = parseInt(parts.find(p=>p.type==="minute").value,10);
+      const deltaMin = (hh*60 + mm) - (obsH*60 + obsM);
+      return new Date(guess.getTime() - deltaMin*60000);
+    }
+
+    // Next spawn for interval bosses (anchored to server reset)
+    function nextFromResetInterval(intervalHours){
+      const [h, m] = SERVER_RESET_HHMM.split(":").map(Number);
+      const resetToday = serverTodayAt(h, m);
+      const now = new Date();
+      const lastReset = (now >= resetToday) ? resetToday : new Date(resetToday.getTime() - 24*3600*1000);
+      const step = intervalHours * 3600 * 1000;
+      const elapsed = now - lastReset;
+      if (elapsed < 0) return lastReset;
+      const k = Math.ceil(elapsed / step);
+      return new Date(lastReset.getTime() + k * step);
+    }
+
+    // Next spawn for fixed-time bosses (daily at fixed HH:MM CET)
+    function nextFromFixedCET(hhmm){
+      const [hh, mm] = hhmm.split(":").map(Number);
+      const todayAt = serverTodayAt(hh, mm);
+      const now = new Date();
+      return (now <= todayAt) ? todayAt : new Date(todayAt.getTime() + 24*3600*1000);
+    }
+
+    function buildRows() {
+      tbody.innerHTML = "";
+      BOSSES.forEach((b, i) => {
+        // Detect PvP rows (everything from first row whose name starts with 'PvP -')
+        const isPvP = b.name.startsWith("PvP -");
+
+        // Boss cell HTML: PvP badge left + centered name (without 'PvP - ' prefix)
+        const bossLabel = isPvP ? b.name.replace(/^PvP -\s*/i, "") : b.name;
+        const bossCell = isPvP
+          ? `<td class="boss-cell"><span class="pvp-badge">PvP</span><span class="boss-name">${bossLabel}</span></td>`
+          : `<td>${bossLabel}</td>`;
+
+        // Interval column: show "HH:MM CET" for fixed-time bosses
+        const intervalCell = b.fixedCET ? `${b.fixedCET} CET` : `${b.interval}h`;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          ${bossCell}
+          <td>${b.location}</td>
+          <td>${intervalCell}</td>
+          <td class="nextTime" id="next-${i}">--:--</td>
+          <td id="cd-${i}">--:--:--</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ===== Timezone picker (combined tab) =====
+    const tzToggle = document.getElementById("tzToggle");
+    const tzMenu = document.getElementById("tzMenu");
+    const tzSearch = document.getElementById("tzSearch");
+    const tzList = document.getElementById("tzList");
+    const tzCurrent = document.getElementById("tzCurrent");
+
+    const ALL_TZS = (Intl.supportedValuesOf && Intl.supportedValuesOf("timeZone")) || [
+      "UTC","Europe/Vienna","Europe/Berlin","Europe/London","America/New_York","America/Los_Angeles","Asia/Tokyo","Australia/Sydney"
+    ];
+
+    function renderTzList(filter = "") {
+      tzList.innerHTML = "";
+      const q = filter.trim().toLowerCase();
+      ALL_TZS
+        .filter(tz => tz.toLowerCase().includes(q))
+        .forEach(tz => {
+          const div = document.createElement("div");
+          div.className = "tz-item";
+          const label = `${tz} (${utcOffsetLabel(tz)})`;
+          div.textContent = label;
+          div.dataset.tz = tz;
+          div.addEventListener("click", () => selectTimezone(tz, label));
+          tzList.appendChild(div);
+        });
+    }
+    function openTzMenu(){
+      const rect = tzToggle.getBoundingClientRect();
+      tzMenu.style.top = `${rect.bottom + window.scrollY + 6}px`;
+      tzMenu.style.left = `50%`;
+      tzMenu.classList.add("open");
+      tzToggle.setAttribute("aria-expanded","true");
+      tzSearch.value = "";
+      renderTzList("");
+      setTimeout(()=>tzSearch.focus(),0);
+    }
+    function closeTzMenu(){
+      tzMenu.classList.remove("open");
+      tzToggle.setAttribute("aria-expanded","false");
+    }
+    function selectTimezone(tz, label){
+      localStorage.setItem("boss_timezone", tz);
+      tzCurrent.textContent = label;
+      closeTzMenu();
+      startTick();
+    }
+
+    tzToggle.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      tzMenu.classList.contains("open") ? closeTzMenu() : openTzMenu();
+    });
+    tzSearch.addEventListener("input", (e)=> renderTzList(e.target.value));
+    document.addEventListener("click", (e)=> {
+      if (!tzMenu.contains(e.target) && e.target !== tzToggle) closeTzMenu();
+    });
+    document.addEventListener("keydown", (e)=> { if (e.key === "Escape") closeTzMenu(); });
+
+    // Init picker label
+    (function initPicker(){
+      const saved = localStorage.getItem("boss_timezone");
+      const localTZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      const tz = saved || localTZ;
+      tzCurrent.textContent = `${tz} (${utcOffsetLabel(tz)})`;
+    })();
+
+    // ===== Ticking logic =====
+    let tickHandle = null;
+    function startTick(){
+      if (tickHandle) clearInterval(tickHandle);
+      const tz = (localStorage.getItem("boss_timezone")) || (Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
+      function tick(){
+        const now = new Date();
+        BOSSES.forEach((b,i)=>{
+          const next = b.fixedCET ? nextFromFixedCET(b.fixedCET) : nextFromResetInterval(b.interval);
+          const diff = next - now;
+          const nextEl = document.getElementById(`next-${i}`);
+          const cdEl = document.getElementById(`cd-${i}`);
+          nextEl.textContent = fmtHMInTZ(next, tz);
+          nextEl.classList.toggle("soon", diff <= 15*60*1000 && diff > 0);
+          cdEl.classList.toggle("now", diff <= 5*1000);
+          cdEl.textContent = diff <= 0 ? "SPAWNING…" : fmtHMS(diff);
+        });
+      }
+      tick();
+      tickHandle = setInterval(tick, 1000);
+    }
+
+    buildRows();
+    startTick();
+  </script>
 </body>
 </html>
-
-
