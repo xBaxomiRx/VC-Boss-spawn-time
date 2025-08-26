@@ -191,28 +191,28 @@
 
     // Add bosses here. For PvP/fixed-time bosses, use fixedCET:"HH:MM" instead of interval.
     const BOSSES = [
-      { name: "Anubis",               location: "Alexandria",         interval: 3 },
-      { name: "Lost King",            location: "Madeira",            interval: 3 },
-      { name: "Shogun",               location: "Edo",                interval: 4 },
-      { name: "Minotaur",             location: "Crete",              interval: 4 },
-      { name: "Golden Buddha",        location: "Semerang",           interval: 4 },
-      { name: "Hell Hound",           location: "Stockholm",          interval: 4 },
-      { name: "General Charlie Will", location: "London - Tortuga",   interval: 12 },
-      { name: "General Cruz",         location: "Seville - Tortuga",  interval: 12 },
+  { name: "Anubis",               location: "Alexandria",     interval: 3 },
+  { name: "Lost King",            location: "Madeira",        interval: 3 },
+  { name: "Shogun",               location: "Edo",            interval: 4 },
+  { name: "Minotaur",             location: "Crete",          interval: 4 },
+  { name: "Golden Buddha",        location: "Semerang",       interval: 4 },
+  { name: "Hell Hound",           location: "Stockholm",      interval: 4 },
+  { name: "General Charlie Will", location: "London-Tortuga", interval: 12 },
+  { name: "General Cruz",         location: "Seville-Tortuga",interval: 12 },
 
-      // PvP section (from here down we show the PvP badge)
-      { name: "PvP - Strange Pirate Chief", location: "Jamestown",                interval: 1 },
-      { name: "PvP - Rock Man",             location: "Jamestown",                interval: 2 },
-      { name: "PvP - Lost Waterway Pirate", location: "New Amsterdam",            interval: 1 },
-	  { name: "PvP - General Ken",          location: "New Amsterdam",            interval: 2 },
+  // PvP section
+  { name: "PvP - Strange Pirate Chief", location: "Jamestown",     interval: 1 },
+  { name: "PvP - Rock Man",             location: "Jamestown",     interval: 2 },
+  { name: "PvP - Lost Waterway Pirate", location: "New Amsterdam", interval: 1 },
+  { name: "PvP - General Ken",          location: "New Amsterdam", interval: 2 },
 
-      // Last five use FIXED CET TIMES (daily)
-      { name: "PvP - General Justin",       location: "Mogadishu",                    fixedCET: "19:00" },
-      { name: "PvP - King Kong",            location: "New Amsterdam",                fixedCET: "21:00" },
-      { name: "PvP - Hydra",                location: "Hydra cave of flames (Zhigu)", fixedCET: "22:00" },
-      { name: "PvP - Ice Dragon",           location: "Basra",                        fixedCET: "18:00" },
-      { name: "PvP - Fenrir",               location: "Oslo",                         fixedCET: "15:00" },
-    ];
+  // Fixed time PvP bosses
+  { name: "PvP - General Justin", location: "Mogadishu",     fixedCET: "18:00" },
+  { name: "PvP - King Kong",      location: "New Amsterdam", fixedCET: "19:00" },   // ✅ fixed now
+  { name: "PvP - Hydra",          location: "Hydra cave of flames (Zhigu)", fixedCET: "21:00" }, // ✅ fixed now
+  { name: "PvP - Ice Dragon",     location: "Basra",         fixedCET: "22:00" },
+  { name: "PvP - Fenrir",         location: "Oslo",          fixedCET: "15:00" },
+];
     /* ======================== */
 
     const serverResetLabel = document.getElementById("serverResetLabel");
